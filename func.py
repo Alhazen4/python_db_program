@@ -19,7 +19,6 @@ class StudiKasus2:
         self.user = 'root' #Fill with your user name
         self.password = config('PASSDB') #Fill with your password or local variable name
 
-    def check_conn(self):
         self.conn = mysql.connect(
             host=self.host,
             port=self.port,
@@ -79,15 +78,9 @@ class StudiKasus2:
     
     # NOT REVISED YET
     def load_data(self, db_name, table_name):
-        conn = mysql.connect(
-            host=self.host,
-            port=self.port,
-            user=self.user,
-            passwd=self.password
-        )
         try:
-            if conn.is_connected():
-                cursor = conn.cursor()
+            if self.conn.is_connected():
+                cursor = self.conn.cursor()
                 cursor.execute("SELECT * FROM {}.{}".format(db_name, table_name))
                 result = cursor.fetchall()
                 return result
