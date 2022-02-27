@@ -1,17 +1,20 @@
 import mysql.connector as mysql
 from mysql.connector import Error
 import sqlalchemy
-from urllib.parse import quote_plus as urlquote
-import matplotlib.pyplot as plt
 import pandas as pd
+
 
 # decouple is library for importing local variable for Linux OS
 from decouple import config
 
 class StudiKasus2:
     """
+    --------------------------------------------
     Initiaze this class with some variable like host, port and user
     to connect to the database.
+
+    mysql.connect is the built-in function to try connect to the DB
+    with the host, port, user, and password parameter from def _init_
     """
     def _init_(self, host, port, user, password):
         self.host = 'localhost' #Fill with your host name
@@ -26,11 +29,11 @@ class StudiKasus2:
             passwd=self.password
         )
 
-    """
-    mysql.connect is the built-in function to try connect to the DB
-    with the host, port, user, and password parameter from def _init_
-    """
     def connect_db(self):
+        """
+        -----------------------
+        Call for test has this program been connected to the database.
+        """
         try:
             if self.conn.is_connected():
                 cursor = self.conn.cursor()
@@ -40,12 +43,13 @@ class StudiKasus2:
             # If can't connect to the database, it will print this error message
             print("Error while connecting to MySQL", e)
     
-    """
-    Function to ceate database,
-    db_name is the parameter you can input in it and will be
-    the name of your database.
-    """
     def create_db(self, db_name):
+        """
+        --------------------------
+        Function to ceate database,
+        db_name is the parameter you can input in it and will be
+        the name of your database.
+        """
         try:
             if self.conn.is_connected():
                 cursor = self.conn.cursor()
@@ -54,12 +58,44 @@ class StudiKasus2:
         except Error as e:
             print("Error while connecting to MySQL", e)
 
-    """
-    Function to ceate table,
-    db_name and table_name is the parameter you can input in it and will be
-    the name of your database.
-    """
+    def import_csv(self, path):
+        """
+        -------------------------------
+        NOTE: CALL THIS FUNCTION FIRSTLY BEFORE YOU CREATE THE TABLE ON DATABASE
+
+        Fill the path attribute with your path file of the csv file.
+        """
+        global df
+        df = pd.read_csv(path, index_col=False, delimiter=',', encoding='latin1')
+    
+    def imp_df():
+        """
+        ----------
+        Function to get the data file (df) from import_csv() function.
+        """
+        return df
+
     def create_table(self, db_name, table_name, df):
+        """
+        ------------------------------
+        Call it to create a new table.
+
+        Fill db_name and table_name with the database you will use and table name you want.
+        The df attribute will automatically filled since imp_df() function called before this function.
+
+        NOTE:
+        "engine" variable here is the part of sqlalchemy.
+        Sqlalchemy is the engine to connect between Python and the database so the user
+        can perform some SQL statement.
+
+        Look at "engine_stmt", there is statement 'mysql+mysqlconnector', this is the DBAPI
+        or “Python Database API Specification” with purpose to connect Python application can talk with database.
+
+        If you use Postgres, Microsoft SQL Server, or another database engine, you should change the statement. 
+        'mysql+mysqlconnector' is DBAPI for MariaDB, usually for who use the XAMPP.
+        
+        Look at https://docs.sqlalchemy.org/en/14/core/engines.html for other information.
+        """
         try:
             if self.conn.is_connected():
                 cursor = self.conn.cursor()
@@ -68,16 +104,22 @@ class StudiKasus2:
         except Error as e:
             print("Error while connecting to MySQL", e)
 
-        engine_stmt = 'mysql+mysqldb://%s:%s@%s:%s/%s' % (self.user, urlquote(self.password),
+        engine_stmt = 'mysql+mysqlconnector://%s:%s@%s:%s/%s' % (self.user, self.password,
                                                             self.host, self.port, db_name)
         engine = sqlalchemy.create_engine(engine_stmt)
-
+                
         df.to_sql(name=table_name, con=engine,
                   if_exists='append', index=False, chunksize=1000)
 
     
-    # NOT REVISED YET
     def load_data(self, db_name, table_name):
+        """
+        -------------------------------------
+        Call it to show all data of the table.
+
+        Fill db_name and table_name with the database you will use and table name you want.
+        It is like you use SELECT * FROM TABLE in MySQL programming.
+        """
         try:
             if self.conn.is_connected():
                 cursor = self.conn.cursor()
@@ -86,6 +128,3 @@ class StudiKasus2:
                 return result
         except Error as e:
             print("Error while connecting to MySQL", e)
-
-    def import_csv(self, path):
-        return pd.read_csv(path, index_col=False, delimiter=',')
