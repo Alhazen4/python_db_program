@@ -28,6 +28,7 @@ def Home():
         tryConnDB()
         dbname = input("Input your new database name: ")
         dbfunc.create_db(dbfunc, dbname)
+        Home()
 
     elif choice == "3":
         tryConnDB()
@@ -43,14 +44,15 @@ def Home():
         dafe = dbfunc.imp_df()
         print(dafe)
         dbfunc.create_table(dbfunc, dbname, tbname, dafe)
+        Home()
 
     elif choice == "5":
         tryConnDB()
         dbname = input("Input the name of database: ")
         tbname = input("Input the name of table: ")
         dbfunc.load_data(dbfunc, dbname, tbname)
+        Home()
 
     elif choice == "6":
         help(StudiKasus2)
-        
 Home()
